@@ -396,8 +396,8 @@ class GameData:
     def recover_data_from_file(self):
         with open(GAME_DATA_FILE, 'r') as game_data_file:
             data_dic = json.load(game_data_file)
-            self.gamemode = data_dic["mode"]
-            self.correspondences = data_dic["correspondences"]
+            self.gamemode = data_dic.get("mode")
+            self.correspondences = data_dic.get("correspondences")
 
 
 current_game = GameData()
