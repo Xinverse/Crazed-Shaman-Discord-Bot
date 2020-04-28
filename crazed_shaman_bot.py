@@ -1,5 +1,5 @@
 # TODO LIST
-# 1 - Fedit command & error
+# 1 - Fedit command
 # 2 - Hour of Werewolf
 # 3 - Bugs in name recognition
 # 4 - Check with no arguments return user
@@ -449,8 +449,11 @@ def is_in_server(userid):
 
 # Checks if it's a command
 def is_command(message):
-    prefix = message[0]
-    return prefix == PREFIX and len(message) > 1
+    if message:
+        prefix = message[0]
+        return prefix == PREFIX and len(message) > 1
+    else:
+        return False
 
 
 # Gets the (unique) parameter, or first word of a list of parameters
@@ -705,7 +708,6 @@ async def on_message(message):
 
         # Lobby game start message detected
         if is_game_start_message(message):
-            current_game.clear()
             current_game.set_player_list(get_all_players(message))
             await log("Game started with these players: " + str(get_all_players(message)))
 
@@ -758,7 +760,10 @@ async def on_message(message):
     ############################################################################################################################ UNFINISHED - start
 
     if handles_command(post, ["debug"], False, 2, messenger.id):
-        await message.channel.send(":ok_hand:")
+        print(current_game.correspondences)
+        print(current_game.correspondences())
+        print(current_game.gamemode)
+        await message.channel.send(":ok_hand: ")
 
     # ===== Edit command
     elif handles_command(post, ["fedit"], 4, 1, messenger.id):
