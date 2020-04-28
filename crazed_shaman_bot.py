@@ -391,11 +391,13 @@ class GameData:
 
     def offload_data_in_file(self):
         with open(GAME_DATA_FILE, 'w') as game_data_file:
+            print(current_game.create_json_data())
             json.dump(current_game.create_json_data(), game_data_file)
 
     def recover_data_from_file(self):
         with open(GAME_DATA_FILE, 'r') as game_data_file:
             data_dic = json.load(game_data_file)
+            print(data_dic)
             self.gamemode = data_dic.get("mode")
             self.correspondences = data_dic.get("correspondences")
 
