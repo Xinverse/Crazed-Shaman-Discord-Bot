@@ -765,7 +765,12 @@ async def on_message(message):
         with open(GAME_DATA_FILE, 'w') as game_data_file:
             json.dump({"test": 123, "another test": 456}, game_data_file)
         await message.channel.send(":ok_hand: ")
-        
+
+    elif handles_command(post, ["debug1"], False, 2, messenger.id):
+        with open(GAME_DATA_FILE, 'r') as game_data_file:
+            data_dic = json.load(game_data_file)
+            print(data_dic)
+
     elif handles_command(post, ["debug2"], False, 2, messenger.id):
         print(current_game.correspondences)
         print(current_game.create_json_data())
