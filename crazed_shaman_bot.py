@@ -376,7 +376,7 @@ class GameData:
         if self.winners:
             for winner_id in self.winners:
                 user = client.get_guild(int(SERVER_ID)).get_member(int(winner_id))
-                winners_str += make_bold(user.nick) if user else make_bold(winners_id)
+                winners_str += make_bold(user.nick) if user else make_bold(winner_id)
                 winners_str += "; "
         else:
             winners_str += make_bold("None")
@@ -761,7 +761,7 @@ async def on_message(message):
 
     if handles_command(post, ["debug"], False, 2, messenger.id):
         print(current_game.correspondences)
-        print(current_game.correspondences())
+        print(current_game.create_json_data())
         print(current_game.gamemode)
         await message.channel.send(":ok_hand: ")
 
