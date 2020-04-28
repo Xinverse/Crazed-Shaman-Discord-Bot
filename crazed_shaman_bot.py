@@ -1,5 +1,5 @@
 # TODO LIST
-# 1 - Fedit command
+# 1 - Fedit command & error
 # 2 - Hour of Werewolf
 # 3 - Bugs in name recognition
 # 4 - Check with no arguments return user
@@ -12,10 +12,9 @@ import pymongo
 import threading
 import datetime
 import time
-import json
 import re
-import os
 from collections import deque
+import os
 from dotenv import load_dotenv
 
 # ----- CONFIG VARIABLES ----------------------------------------------------------------------------------------------
@@ -56,7 +55,6 @@ BOT_ADMINS = eval(os.getenv("BOT_ADMINS"))
 HOW_ROLE = "Hour of WW"
 
 # Bot configurations
-
 MIN_CHARACTERS = 7  # Minimum number of characters in a message in order to be awarded a point
 POINTS_PER_MSG = 1  # Number of points awarded per eligible message (DEFAULT to 1)
 DOWN_TIME = 3600  # How frequently should scores decay in seconds (DEFAULT to 3600)
@@ -65,10 +63,8 @@ BACKUP_TIMER = 3600 * 12  # How frequently should scores be backed up?
 SPAM_TOLERATED = 6  # Similar to Whale-Wolf ignore (DEFAULT to 6)
 LEADERBOARD_MAX = 10  # Maximum number of users that show up on the leaderboard
 RECORD_MAX = 10  # Maximum number of users that show up on the record board
-GAME_DATA_FILE = "game_data.json"
 
 # Esthetics
-
 COLOR_LEADERBOARD = 0x9cf700  # Color of the leaderboard embed
 COLOR_RECORD = 0x00d9f9  # Color of the record board embed
 COLOR_ACTIVITY = 0xff0081  # Color of the individual activity board
@@ -376,34 +372,15 @@ class GameData:
         if self.winners:
             for winner_id in self.winners:
                 user = client.get_guild(int(SERVER_ID)).get_member(int(winner_id))
-                winners_str += make_bold(user.nick) if user else make_bold(winner_id)
+                winners_str += make_bold(user.nick) if user else make_bold(winners_id)
                 winners_str += "; "
         else:
             winners_str += make_bold("None")
 
         return display_str + winners_str
 
-    def create_json_data(self):
-        final_dic = {}
-        final_dic["correspondences"] = self.correspondences
-        final_dic["mode"] = self.gamemode
-        return final_dic
-
-    def offload_data_in_file(self):
-        with open(GAME_DATA_FILE, 'w') as game_data_file:
-            print(current_game.create_json_data())
-            json.dump(current_game.create_json_data(), game_data_file)
-
-    def recover_data_from_file(self):
-        with open(GAME_DATA_FILE, 'r') as game_data_file:
-            data_dic = json.load(game_data_file)
-            print(data_dic)
-            self.gamemode = data_dic.get("mode")
-            self.correspondences = data_dic.get("correspondences")
-
 
 current_game = GameData()
-current_game.recover_data_from_file()
 
 
 # Turn user ID into a ping
@@ -451,11 +428,8 @@ def is_in_server(userid):
 
 # Checks if it's a command
 def is_command(message):
-    if message:
-        prefix = message[0]
-        return prefix == PREFIX and len(message) > 1
-    else:
-        return False
+    prefix = message[0]
+    return prefix == PREFIX and len(message) > 1
 
 
 # Gets the (unique) parameter, or first word of a list of parameters
@@ -710,13 +684,13 @@ async def on_message(message):
 
         # Lobby game start message detected
         if is_game_start_message(message):
+            current_game.clear()
             current_game.set_player_list(get_all_players(message))
             await log("Game started with these players: " + str(get_all_players(message)))
 
         # Logs game start message detected
         elif is_game_object_message(message):
             parse_game_object_message(message)
-            current_game.offload_data_in_file()
             #await log("**LOGS** Game info temporary data (to-do!): " + current_game.display())
 
         # Lobby game over message detected
@@ -762,20 +736,7 @@ async def on_message(message):
     ############################################################################################################################ UNFINISHED - start
 
     if handles_command(post, ["debug"], False, 2, messenger.id):
-        with open(GAME_DATA_FILE, 'w') as game_data_file:
-            json.dump({"test": 123, "another test": 456}, game_data_file)
-        await message.channel.send(":ok_hand: ")
-
-    elif handles_command(post, ["debug1"], False, 2, messenger.id):
-        with open(GAME_DATA_FILE, 'r') as game_data_file:
-            data_dic = json.load(game_data_file)
-            print(data_dic)
-
-    elif handles_command(post, ["debug2"], False, 2, messenger.id):
-        print(current_game.correspondences)
-        print(current_game.create_json_data())
-        print(current_game.gamemode)
-        await message.channel.send(":ok_hand: ")
+        await message.channel.send(":ok_hand:")
 
     # ===== Edit command
     elif handles_command(post, ["fedit"], 4, 1, messenger.id):
