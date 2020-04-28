@@ -773,7 +773,7 @@ async def on_message(message):
 
     # ===== Github command
     elif handles_command(post, ["github"], False, 0, messenger.id):
-        msg = "The bot's code can be found at: https://github.com/Xinverse/crazed-shaman-public"
+        msg = "The bot's code can be found at: https://github.com/Xinverse/crazed_shaman"
         await message.channel.send(msg)
 
     # ===== Darkener Houserule command
