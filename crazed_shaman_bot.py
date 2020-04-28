@@ -56,6 +56,7 @@ BOT_ADMINS = eval(os.getenv("BOT_ADMINS"))
 HOW_ROLE = "Hour of WW"
 
 # Bot configurations
+
 MIN_CHARACTERS = 7  # Minimum number of characters in a message in order to be awarded a point
 POINTS_PER_MSG = 1  # Number of points awarded per eligible message (DEFAULT to 1)
 DOWN_TIME = 3600  # How frequently should scores decay in seconds (DEFAULT to 3600)
@@ -67,6 +68,7 @@ RECORD_MAX = 10  # Maximum number of users that show up on the record board
 GAME_DATA_FILE = "game_data.json"
 
 # Esthetics
+
 COLOR_LEADERBOARD = 0x9cf700  # Color of the leaderboard embed
 COLOR_RECORD = 0x00d9f9  # Color of the record board embed
 COLOR_ACTIVITY = 0xff0081  # Color of the individual activity board
