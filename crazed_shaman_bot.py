@@ -89,6 +89,7 @@ col_temp = db_werewolf.temporary  # Temporary collection, for operations
 
 # Collections for ratings related data
 col_ratings = db_werewolf.ratings  # Player ratings
+col_current = db_werewolf.current
 
 rate_limit_dict = {}
 bootTime = 0
@@ -308,6 +309,10 @@ class GameData:
 
         self.correspondences = dic
 
+    def set_pair(self, userid, role):
+
+        self.correspondences[userid] = role
+
     def set_gamemode(self, mode):
 
         self.gamemode = mode
@@ -360,9 +365,9 @@ class GameData:
         display_str = ""
 
         for key in self.correspondences:
-            user = client.get_guild(int(SERVER_ID)).get_member(int(key))
+            user = client.get_user(int(key))
             role = self.correspondences[key]
-            display_str += make_bold(user.display_name) if user else make_bold(key)
+            display_str += make_bold(user.name) if user else make_bold(key)
             display_str += " is " + make_bold(role)
             display_str += " ; "
 
@@ -371,16 +376,41 @@ class GameData:
 
         if self.winners:
             for winner_id in self.winners:
-                user = client.get_guild(int(SERVER_ID)).get_member(int(winner_id))
-                winners_str += make_bold(user.nick) if user else make_bold(winners_id)
+                user = client.get_user(int(winner_id))
+                winners_str += make_bold(user.name) if user else make_bold(winners_id)
                 winners_str += "; "
         else:
             winners_str += make_bold("None")
 
         return display_str + winners_str
 
+    def dump_to_remote(self):
+
+        col_current.drop()
+        if self.correspondences:
+            for userid, rolename in self.correspondences.items():
+                userid = str(userid)  # 600426113285750785
+                rolename = str(rolename)  # "crazed shaman"
+                gamemode = str(self.gamemode)  # "default"
+                col_current.update_one(
+                    {"_id": userid},
+                    {"role": rolename, "gamemode": gamemode},
+                    upsert=True
+                )
+
+    def fetch_from_remote(self):
+
+        for entry in col_current.find():
+            userid = entry["_id"]
+            role = entry["role"]
+            gamemode = entry["gamemode"]
+            self.set_pair(userid, role)
+            self.set_gamemode(gamemode)
+        col_current.drop()
+
 
 current_game = GameData()
+current_game.fetch_from_remote()
 
 
 # Turn user ID into a ping
@@ -428,8 +458,11 @@ def is_in_server(userid):
 
 # Checks if it's a command
 def is_command(message):
-    prefix = message[0]
-    return prefix == PREFIX and len(message) > 1
+    if message:
+        prefix = message[0]
+        return prefix == PREFIX and len(message) > 1
+    else:
+        return False
 
 
 # Gets the (unique) parameter, or first word of a list of parameters
@@ -684,13 +717,13 @@ async def on_message(message):
 
         # Lobby game start message detected
         if is_game_start_message(message):
-            current_game.clear()
             current_game.set_player_list(get_all_players(message))
             await log("Game started with these players: " + str(get_all_players(message)))
 
         # Logs game start message detected
         elif is_game_object_message(message):
             parse_game_object_message(message)
+            current_game.dump_to_remote()
             #await log("**LOGS** Game info temporary data (to-do!): " + current_game.display())
 
         # Lobby game over message detected
