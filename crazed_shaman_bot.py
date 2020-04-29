@@ -394,7 +394,7 @@ class GameData:
                 gamemode = str(self.gamemode)  # "default"
                 col_current.update_one(
                     {"_id": userid},
-                    {"role": rolename, "gamemode": gamemode},
+                    {"$set": {"role": rolename, "gamemode": gamemode}},
                     upsert=True
                 )
 
