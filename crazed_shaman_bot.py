@@ -377,7 +377,7 @@ class GameData:
         if self.winners:
             for winner_id in self.winners:
                 user = client.get_user(int(winner_id))
-                winners_str += make_bold(user.name) if user else make_bold(winners_id)
+                winners_str += make_bold(user.name) if user else make_bold(winner_id)
                 winners_str += "; "
         else:
             winners_str += make_bold("None")
