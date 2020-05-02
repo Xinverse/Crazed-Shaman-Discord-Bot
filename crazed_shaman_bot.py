@@ -89,7 +89,9 @@ col_temp = db_werewolf.temporary  # Temporary collection, for operations
 
 # Collections for ratings related data
 col_ratings = db_werewolf.ratings  # Player ratings
-col_current = db_werewolf.current
+col_ratings_backup = db_werewolf.ratings_backup  # Player ratings backup
+col_current = db_werewolf.current  # Temporary collection, for the most recent game
+col_names = db_werewolf.names  # Player usernames
 
 rate_limit_dict = {}
 bootTime = 0
@@ -342,9 +344,16 @@ class GameData:
             rolename = str(rolename)   # "crazed shaman"
             gamemode = str(self.gamemode)  # "default"
             total = "total"  # "total"
+            member = client.get_server(int(SERVER_ID)).get_member(int(userid))
+            name = "{}#{}".format(member.name, member.discriminator)
             col_ratings.update_one(
                 {"_id": userid},
                 {"$inc": {rolename: 1, gamemode: 1, total: 1}},
+                upsert=True
+            )
+            col_names.update_one(
+                {"_id": userid},
+                {"$set": {"username": name}},
                 upsert=True
             )
         for userid in self.winners:
@@ -1385,6 +1394,7 @@ async def on_ready():
 
 # Thread that lowers activity
 def punish_inactives():
+
     threading.Timer(DOWN_TIME, punish_inactives).start()
     print("SCORE DECAY -- START")
     for entry in col_players.find():
@@ -1399,6 +1409,7 @@ def punish_inactives():
 
 # Thread that punishes short burst spammers
 def reset_spam_timer():
+
     threading.Timer(SPAM_TIMER, reset_spam_timer).start()
     global rate_limit_dict
     rate_limit_dict = {}
@@ -1407,10 +1418,14 @@ def reset_spam_timer():
 
 # Thread that backups up the database
 def backup():
+    
     threading.Timer(BACKUP_TIMER, backup).start()
     col_backup.drop()
     for doc in col_players.find():
         col_backup.insert(doc)
+    col_ratings_backup.drop()
+    for doc in col_ratings.find():
+        col_ratings_backup.insert(doc)
     print("Backing up -- DONE;")
 
 
