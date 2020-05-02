@@ -345,7 +345,10 @@ class GameData:
             gamemode = str(self.gamemode)  # "default"
             total = "total"  # "total"
             member = client.get_guild(int(SERVER_ID)).get_member(int(userid))
-            name = "{}#{}".format(member.name, member.discriminator)
+            if member:
+                name = "{}#{}".format(member.name, member.discriminator)
+            else:
+                name = userid
             col_ratings.update_one(
                 {"_id": userid},
                 {"$inc": {rolename: 1, gamemode: 1, total: 1}},
