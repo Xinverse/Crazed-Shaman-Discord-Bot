@@ -344,7 +344,7 @@ class GameData:
             rolename = str(rolename)   # "crazed shaman"
             gamemode = str(self.gamemode)  # "default"
             total = "total"  # "total"
-            member = client.get_server(int(SERVER_ID)).get_member(int(userid))
+            member = client.get_guild(int(SERVER_ID)).get_member(int(userid))
             name = "{}#{}".format(member.name, member.discriminator)
             col_ratings.update_one(
                 {"_id": userid},
