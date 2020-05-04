@@ -13,8 +13,9 @@ import threading
 import datetime
 import time
 import re
-from collections import deque
 import os
+import asyncio
+from collections import deque
 from dotenv import load_dotenv
 
 # ----- CONFIG VARIABLES ----------------------------------------------------------------------------------------------
@@ -469,14 +470,20 @@ def is_in_server(userid):
 
 
 # Sends the user an easter egg when they reach 10k AP
-async def check_points_for_joke(count, userid):
-    if count >= 10000:
+async def check_points_for_joke(old_count, new_count, userid):
+    if old_count < 10000 and new_count >= 10000:
         member = client.get_user(int(userid))
-        await member.send("Higher being, these words are for you alone;\n" 
-                          "You have reached 10 Activity Points.\n" 
-                          "Ascended upgrades are within your reach.\n" 
-                          "Click on this link to *purchase the server owner role* for 10k AP!\n" 
-                          "https://ibb.co/vJcbkdb")
+        await member.send("Higher being, these words are for you alone...")
+        await asyncio.sleep(1)
+        await member.send("You have reached 10 Activity Points. Quite impressive, I must say.")
+        await asyncio.sleep(3)
+        await member.send("Ascended upgrades are within your reach... ")
+        await asyncio.sleep(1)
+        await member.send("Here, let me send you this as a token of my esteem.")
+        await asyncio.sleep(1)
+        await member.send("Click on this link to *purchase the server owner role* for 10k AP!")
+        await asyncio.sleep(1)
+        await member.send("<https://ibb.co/vJcbkdb>")
 
 
 # Checks if it's a command
@@ -1310,7 +1317,7 @@ async def on_message(message):
                 col_players.update_one({"userid": str(messenger.id)}, {"$set": {"points": new_score}})
                 col_players.update_one({"userid": str(messenger.id)}, {"$set": {"messages": new_messages}})
                 col_players.update_one({"userid": str(messenger.id)}, {"$set": {"highest": new_high}})
-                await check_points_for_joke(new_score, messenger.id)
+                await check_points_for_joke(old_score, new_score, messenger.id)
 
             # If the player does not have an entry within the database
             else:
@@ -1341,7 +1348,7 @@ async def on_message(message):
                 col_players.update_one({"userid": str(messenger.id)}, {"$set": {"points": new_score}})
                 col_players.update_one({"userid": str(messenger.id)}, {"$set": {"messages": new_messages}})
                 col_players.update_one({"userid": str(messenger.id)}, {"$set": {"highest": new_high}})
-                await check_points_for_joke(new_score, messenger.id)
+                await check_points_for_joke(old_score, new_score, messenger.id)
 
             # If the player does not have an entry within the database
             else:
@@ -1374,7 +1381,7 @@ async def on_message(message):
             col_players.update_one({"userid": str(messenger.id)}, {"$set": {"points": new_score}})
             col_players.update_one({"userid": str(messenger.id)}, {"$set": {"messages": new_messages}})
             col_players.update_one({"userid": str(messenger.id)}, {"$set": {"highest": new_high}})
-            await check_points_for_joke(new_score, messenger.id)
+            await check_points_for_joke(old_score, new_score, messenger.id)
 
         # If the player does not have an entry within the database
         else:
