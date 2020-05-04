@@ -266,9 +266,16 @@ usable_commands = {
 
     "github": {
         "aliases": ["github"],
-        "description": "See the link to the public Github repository.",
+        "description": "See the link to Crazed Shaman Bot's public Github repository.",
         "permissions": 0,
         "usage": PREFIX + "github"
+    },
+
+    "ratings": {
+        "aliases": ["ratings", "rating", "rank", "rankings", "ranking"],
+        "description": "See the link to Discord Werewolf Server's official gameplay statistics.",
+        "permissions": 0,
+        "usage": PREFIX + "ratings"
     },
 
     "role": {
@@ -470,18 +477,19 @@ def is_in_server(userid):
 
 
 # Sends the user an easter egg when they reach 10k AP
-async def check_points_for_joke(old_count, new_count, userid):
-    if old_count < 10000 and new_count >= 10000:
+async def check_points_for_joke(old_count, new_count, old_record, userid):
+    HIGHSCORE_TRIGGER = 10000
+    if old_count < HIGHSCORE_TRIGGER and new_count >= HIGHSCORE_TRIGGER and old_record < HIGHSCORE_TRIGGER:
         member = client.get_user(int(userid))
         await member.send("Higher being, these words are for you alone...")
         await asyncio.sleep(1)
-        await member.send("You have reached 10 Activity Points. Quite impressive, I must say.")
+        await member.send("You have reached 10K Activity Points. Quite impressive, I must say.")
         await asyncio.sleep(3)
         await member.send("Ascended upgrades are within your reach... ")
-        await asyncio.sleep(1)
+        await asyncio.sleep(3)
         await member.send("Here, let me send you this as a token of my esteem.")
         await asyncio.sleep(1)
-        await member.send("Click on this link to *purchase the server owner role* for 10k AP!")
+        await member.send("Click on this link to *purchase the server owner role* for 10K AP!")
         await asyncio.sleep(1)
         await member.send("<https://ibb.co/vJcbkdb>")
 
@@ -827,7 +835,13 @@ async def on_message(message):
     elif handles_command(post, ["github"], False, 0, messenger.id):
         msg = "The bot's code can be found at: https://github.com/Xinverse/crazed_shaman"
         await message.channel.send(msg)
-
+    
+    # ===== Ratings command
+    elif handles_command(post, ["ratings", "rating", "rank", "rankings", "ranking"], False, 0, messenger.id):
+        msg = "Discord Werewolf Server's official gameplay statistics can be found at: " \
+              "https://docs.google.com/spreadsheets/d/12F4TdfjN8_TZKg2RBxE3VNW3tztge2c0mA-DzBpsduA/edit?usp=sharing"
+        await message.channel.send(msg)
+    
     # ===== Darkener Houserule command
     elif handles_command(post, ["fdarkener"], False, 1, messenger.id):
         darkener_houserule = not darkener_houserule
@@ -1176,9 +1190,10 @@ async def on_message(message):
     elif handles_command(post, ["freset_ratings"], False, 2, messenger.id):
         check = handles_command(post, ["freset_ratings"], False, 2, messenger.id)
         if check == 1:
-            col_ratings.drop()
-            await message.channel.send("**Ratings database dropped, all stored data deleted. "
-                                       "The database has been reset.**")
+            #col_ratings.drop()
+            #await message.channel.send("**Ratings database dropped, all stored data deleted. " \
+            #                           "The database has been reset.**")
+            await message.channel.send(make_ping(messenger.id) + " This command has been disabled.")
         elif check == 3:
             await message.channel.send(make_ping(messenger.id) + " :heart_exclamation: "
                                                                  "You do not have the permissions to use this command.")
@@ -1317,7 +1332,7 @@ async def on_message(message):
                 col_players.update_one({"userid": str(messenger.id)}, {"$set": {"points": new_score}})
                 col_players.update_one({"userid": str(messenger.id)}, {"$set": {"messages": new_messages}})
                 col_players.update_one({"userid": str(messenger.id)}, {"$set": {"highest": new_high}})
-                await check_points_for_joke(old_score, new_score, messenger.id)
+                #await check_points_for_joke(old_score, new_score, old_high, messenger.id)
 
             # If the player does not have an entry within the database
             else:
@@ -1348,7 +1363,7 @@ async def on_message(message):
                 col_players.update_one({"userid": str(messenger.id)}, {"$set": {"points": new_score}})
                 col_players.update_one({"userid": str(messenger.id)}, {"$set": {"messages": new_messages}})
                 col_players.update_one({"userid": str(messenger.id)}, {"$set": {"highest": new_high}})
-                await check_points_for_joke(old_score, new_score, messenger.id)
+                #await check_points_for_joke(old_score, new_score, old_high, messenger.id)
 
             # If the player does not have an entry within the database
             else:
@@ -1381,7 +1396,7 @@ async def on_message(message):
             col_players.update_one({"userid": str(messenger.id)}, {"$set": {"points": new_score}})
             col_players.update_one({"userid": str(messenger.id)}, {"$set": {"messages": new_messages}})
             col_players.update_one({"userid": str(messenger.id)}, {"$set": {"highest": new_high}})
-            await check_points_for_joke(old_score, new_score, messenger.id)
+            #await check_points_for_joke(old_score, new_score, old_high, messenger.id)
 
         # If the player does not have an entry within the database
         else:
