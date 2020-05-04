@@ -468,6 +468,17 @@ def is_in_server(userid):
     return user
 
 
+# Sends the user an easter egg when they reach 10k AP
+async def check_points_for_joke(count, userid):
+    if count >= 10000:
+        member = client.get_user(int(userid))
+        await member.send("Higher being, these words are for you alone;\n" 
+                          "You have reached 10 Activity Points.\n" 
+                          "Ascended upgrades are within your reach.\n" 
+                          "Click on this link to *purchase the server owner role* for 10k AP!\n" 
+                          "https://ibb.co/vJcbkdb")
+
+
 # Checks if it's a command
 def is_command(message):
     if message:
@@ -1299,6 +1310,7 @@ async def on_message(message):
                 col_players.update_one({"userid": str(messenger.id)}, {"$set": {"points": new_score}})
                 col_players.update_one({"userid": str(messenger.id)}, {"$set": {"messages": new_messages}})
                 col_players.update_one({"userid": str(messenger.id)}, {"$set": {"highest": new_high}})
+                await check_points_for_joke(new_score, messenger.id)
 
             # If the player does not have an entry within the database
             else:
@@ -1329,6 +1341,7 @@ async def on_message(message):
                 col_players.update_one({"userid": str(messenger.id)}, {"$set": {"points": new_score}})
                 col_players.update_one({"userid": str(messenger.id)}, {"$set": {"messages": new_messages}})
                 col_players.update_one({"userid": str(messenger.id)}, {"$set": {"highest": new_high}})
+                await check_points_for_joke(new_score, messenger.id)
 
             # If the player does not have an entry within the database
             else:
@@ -1361,6 +1374,7 @@ async def on_message(message):
             col_players.update_one({"userid": str(messenger.id)}, {"$set": {"points": new_score}})
             col_players.update_one({"userid": str(messenger.id)}, {"$set": {"messages": new_messages}})
             col_players.update_one({"userid": str(messenger.id)}, {"$set": {"highest": new_high}})
+            await check_points_for_joke(new_score, messenger.id)
 
         # If the player does not have an entry within the database
         else:
