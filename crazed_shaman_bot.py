@@ -1,9 +1,9 @@
 # TODO LIST
-# 1 - Fedit command & error
-# 2 - Hour of Werewolf
-# 3 - Bugs in name recognition
-# 4 - Check with no arguments return user
-# 5 - fsync bug
+# 1 - Hour of Werewolf automation
+# 2 - Bugs in name recognition
+# 3 - Check with no arguments return user
+# 4 - Fsync command bug
+# 5 - Use json load instead of eval
 
 
 import discord
@@ -233,14 +233,6 @@ usable_commands = {
         "description": "See helpful information about a command.",
         "permissions": 0,
         "usage": PREFIX + "help <command>"
-    },
-
-    "fedit": {
-        "aliases": ["fedit"],
-        "description": "Manually edit a document within the database. `points`: current activity points. "
-                       "`messages`: number of messages within the decay interval. `highest`: record highscore.",
-        "permissions": 1,
-        "usage": PREFIX + "fedit <user_id> <field: points/messages/highest> <operator: +/-/=> <integer>"
     },
 
     "fremove_how": {
@@ -757,12 +749,14 @@ async def on_message(message):
         if is_game_start_message(message):
             current_game.set_player_list(get_all_players(message))
             await log("Game started with these players: " + str(get_all_players(message)))
+            return
 
         # Logs game start message detected
         elif is_game_object_message(message):
             parse_game_object_message(message)
             current_game.dump_to_remote()
             #await log("**LOGS** Game info temporary data (to-do!): " + current_game.display())
+            return
 
         # Lobby game over message detected
         elif is_game_over_message(message):
@@ -770,6 +764,7 @@ async def on_message(message):
             if darkener_houserule:
                 await log(make_ping(BOT_OWNER[0]) + " Darkener Houserule is now disabled.")
             darkener_houserule = False
+            return
 
         # Logs game over message detected
         elif is_winner_message(message):
@@ -778,6 +773,7 @@ async def on_message(message):
             current_game.push_to_database()
             await log("**LOGS** Winners detected: " + str(parse_winners(message)))
             current_game.clear()
+            return
 
         # Ignore bots other than whale-wolf
         else:
@@ -804,27 +800,8 @@ async def on_message(message):
             else:
                 pass
 
-    ############################################################################################################################ UNFINISHED - start
-
-    if handles_command(post, ["debug"], False, 2, messenger.id):
-        await message.channel.send(":ok_hand:")
-
-    # ===== Edit command
-    elif handles_command(post, ["fedit"], 4, 1, messenger.id):
-        check = handles_command(post, ["fedit"], 4, 1, messenger.id)
-        # fedit <user_id> <field: points/messages/highest> <operator: +/-/=> <integer>
-        if check == 1:
-            await message.channel.send("TODO - not yet implemented")
-        elif check == 2:
-            await message.channel.send(make_ping(messenger.id) + " :x: Invalid format: incorrect number of arguments.")
-        elif check == 3:
-            await message.channel.send(make_ping(messenger.id) + " :heart_exclamation: "
-                                                                 "You do not have the permissions to use this command.")
-
-    ############################################################################################################################ UNFINISHED - end
-
     # ===== Ping command
-    elif handles_command(post, ["ping", "pong"], False, 0, messenger.id):
+    if handles_command(post, ["ping", "pong"], False, 0, messenger.id):
         sentTime = message.created_at
         msg = make_ping(messenger.id) + " :ping_pong: **PONG!**"
         now = datetime.datetime.utcnow()
@@ -833,13 +810,13 @@ async def on_message(message):
 
     # ===== Github command
     elif handles_command(post, ["github"], False, 0, messenger.id):
-        msg = "The bot's code can be found at: https://github.com/Xinverse/crazed_shaman"
+        msg = "The bot's code can be found at: <https://github.com/Xinverse/crazed_shaman>"
         await message.channel.send(msg)
     
     # ===== Ratings command
     elif handles_command(post, ["ratings", "rating", "rank", "rankings", "ranking"], False, 0, messenger.id):
         msg = "Discord Werewolf Server's official gameplay statistics can be found at: " \
-              "https://docs.google.com/spreadsheets/d/12F4TdfjN8_TZKg2RBxE3VNW3tztge2c0mA-DzBpsduA/edit?usp=sharing"
+              "<https://docs.google.com/spreadsheets/d/12F4TdfjN8_TZKg2RBxE3VNW3tztge2c0mA-DzBpsduA/edit?usp=sharing>"
         await message.channel.send(msg)
     
     # ===== Darkener Houserule command
@@ -1012,7 +989,7 @@ async def on_message(message):
             # Skip users that are not in the server
             if is_in_server(user_id):
                 user = client.get_user(int(user_id))
-                line = "{}. **{}**\#{} has an all-time record of **{}** activity points.".format(str(
+                line = "{}. **{}**#{} has an all-time record of **{}** activity points.".format(str( 
                     counter), user.name, user.discriminator, pt)
                 msg += line
                 msg += "\n"
@@ -1050,7 +1027,7 @@ async def on_message(message):
             # Skip users that are not in the server
             if is_in_server(user_id):
                 user = client.get_user(int(user_id))
-                line = "{}. **{}**\#{} has **{}** activity points.".format(str(counter),
+                line = "{}. **{}**#{} has **{}** activity points.".format(str(counter),
                                                                            user.name, user.discriminator, pt)
                 msg += line
                 msg += "\n"
