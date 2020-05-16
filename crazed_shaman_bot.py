@@ -43,9 +43,10 @@ SUGGESTIONS_CHANNEL = os.getenv("SUGGESTIONS_CHANNEL")
 DEBUG_LOGS_CHANNEL = os.getenv("DEBUG_LOGS_CHANNEL")
 # LOBBY_CHANNEL = "251752208980683772"
 LOBBY_CHANNEL = os.getenv("LOBBY_CHANNEL")
+# BETA_CHANNEL = "244452208980683772"
+BETA_CHANNEL = os.getenv("BETA_CHANNEL")
 # SERVER_ID = "251752096906208258"
 SERVER_ID = os.getenv("SERVER_ID")
-PLAYER_ROLE_NAME = "Players"
 # WEREWOLF_BOT = "251745173016068096"
 WEREWOLF_BOT = os.getenv("WEREWOLF_BOT")
 WHALE_WOLF_PREFIX = "!"
@@ -53,7 +54,9 @@ WHALE_WOLF_PREFIX = "!"
 BOT_OWNER = eval(os.getenv("BOT_OWNER"))
 # BOT_ADMINS = ["300426113145750785", "302921511763022889", "593592507102314496"]
 BOT_ADMINS = eval(os.getenv("BOT_ADMINS"))
-HOW_ROLE = "Hour of WW"
+HOW_ROLE_NAME = "Hour of WW"
+BETA_ROLE_NAME = "Beta Tester"
+PLAYER_ROLE_NAME = "Players"
 
 # Bot configurations
 MIN_CHARACTERS = 7  # Minimum number of characters in a message in order to be awarded a point
@@ -728,6 +731,25 @@ async def log(msg):
 
 
 @client.event
+async def on_member_update(before, after):
+    
+    server = client.get_guild(int(SERVER_ID))
+    beta_channel = client.get_channel(int(BETA_CHANNEL))
+    beta_role = discord.utils.get(server.roles, name=BETA_ROLE_NAME)
+    player_role = discord.utils.get(server.roles, name=PLAYER_ROLE_NAME)
+    member_obj = server.get_member(int(before.id))
+
+    # We are dealing with a beta tester
+    if beta_role in before.roles:
+        # Player role was added
+        if player_role not in before.roles and player_role in after.roles:
+            await beta_channel.set_permissions(member_obj, read_messages=False)
+        # Player role was removed
+        elif player_role in before.roles and player_role not in after.roles:
+            await beta_channel.set_permissions(member_obj, overwrite=None)
+
+
+@client.event
 async def on_message(message):
 
     global darkener_houserule
@@ -863,7 +885,7 @@ async def on_message(message):
     elif handles_command(post, ["fremove_how"], False, 1, messenger.id):
         check = handles_command(post, ["fremove_how"], False, 1, messenger.id)
         if check == 1:
-            how_role = discord.utils.get(message.guild.roles, name=HOW_ROLE)
+            how_role = discord.utils.get(message.guild.roles, name=HOW_ROLE_NAME)
             for member in message.guild.members:
                 if how_role in member.roles:
                     await member.remove_roles(how_role)
