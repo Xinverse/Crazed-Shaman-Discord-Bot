@@ -56,6 +56,7 @@ BOT_OWNER = eval(os.getenv("BOT_OWNER"))
 BOT_ADMINS = eval(os.getenv("BOT_ADMINS"))
 HOW_ROLE_NAME = "Hour of WW"
 BETA_ROLE_NAME = "Beta Tester"
+OMEGA_ROLE_NAME = "Omega Tester"
 PLAYER_ROLE_NAME = "Players"
 
 # Bot configurations
@@ -736,11 +737,12 @@ async def on_member_update(before, after):
     server = client.get_guild(int(SERVER_ID))
     beta_channel = client.get_channel(int(BETA_CHANNEL))
     beta_role = discord.utils.get(server.roles, name=BETA_ROLE_NAME)
+    omega_role = discord.utils.get(server.roles, name=OMEGA_ROLE_NAME)
     player_role = discord.utils.get(server.roles, name=PLAYER_ROLE_NAME)
     member_obj = server.get_member(int(before.id))
 
     # We are dealing with a beta tester
-    if beta_role in before.roles:
+    if beta_role in before.roles or omega_role in before.roles:
         # Player role was added
         if player_role not in before.roles and player_role in after.roles:
             await beta_channel.set_permissions(member_obj, read_messages=False)
