@@ -1082,9 +1082,7 @@ async def on_message(message):
             points = lookup_dict.get("points")
             highscore = lookup_dict.get("highest")
             if points:
-                all_docs = col_players.find()
-                in_server = [i for i in all_docs if is_in_server(i["userid"])]
-                lb_by_points = enumerate(in_server.sort("points", -1), 1)
+                lb_by_points = enumerate(col_players.find().sort("points", -1), 1)
                 for i in lb_by_points:
                     if i[1].get("userid") == str(messenger.id):
                         position = i[0]
