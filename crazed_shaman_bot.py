@@ -944,16 +944,28 @@ async def on_message(message):
         check = handles_command(post, ["fsync"], False, 1, messenger.id)
         if check == 1:
             await message.channel.send("Please hold... **Syncing** operation may take a few seconds...")
-            col_temp.drop()
-            uniques = col_players.find().distinct("userid")
-            for userid in uniques:
-                query = {"userid": str(userid)}
-                lookup = col_players.find(query)
-                col_temp.insert(lookup)
-            col_players.drop()
-            for doc in col_temp.find():
-                col_players.insert(doc)
-            col_temp.drop()
+            cursor = col_players.aggregate([
+                {"$group": {"_id": "$userid", "unique_ids": {"$addToSet": "$_id"}, "count": {"$sum": 1}}},
+                {"$match": {"count": { "$gte": 2 }}}
+            ])
+            response = []
+            for doc in cursor:
+                del doc["unique_ids"][0]
+                for id in doc["unique_ids"]:
+                    response.append(id)
+            col_players.delete_many({"_id": {"$in": response}})
+            
+            #col_temp.drop()
+            #uniques = col_players.find().distinct("userid")
+            #for userid in uniques:
+                #query = {"userid": str(userid)}
+                #lookup = col_players.find(query)
+                #col_temp.insert(lookup)
+            #col_players.drop()
+            #for doc in col_temp.find():
+                #col_players.insert(doc)
+            #col_temp.drop()
+            
             await message.channel.send("**Activity database successfully synced. All duplicates have been removed.**")
         elif check == 3:
             await message.channel.send(make_ping(messenger.id) + " :heart_exclamation: "
