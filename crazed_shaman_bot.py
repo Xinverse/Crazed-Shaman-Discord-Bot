@@ -945,7 +945,7 @@ async def on_message(message):
         if check == 1:
             await message.channel.send("Please hold... **Syncing** operation may take a few seconds...")
             col_temp.drop()
-            uniques = col_players.distinct("userid")
+            uniques = col_players.find().distinct("userid")
             for userid in uniques:
                 query = {"userid": str(userid)}
                 lookup = col_players.find(query)
