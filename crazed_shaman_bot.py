@@ -30,7 +30,7 @@ MONGO_PASSWORD = os.getenv("MONGO_PASSWORD")
 
 # User settings - Example of settings vars are in comments, using fictitious data
 
-PREFIX = "."
+PREFIX = "="
 # LOGGING_CHANNEL = "269670622647418891"
 LOGGING_CHANNEL = os.getenv("LOGGING_CHANNEL")  # This is where the bot logs its actions
 # TALKING_CHANNEL = "269670622647418892"
